@@ -251,7 +251,10 @@ public class CustomAlterTableParserListener extends MySqlParserBaseListener {
 
     private com.ververica.cdc.common.schema.Column toCdcColumn(Column dbzColumn) {
         return com.ververica.cdc.common.schema.Column.physicalColumn(
-                dbzColumn.name(), fromDbzColumn(dbzColumn), dbzColumn.comment());
+                dbzColumn.name(),
+                fromDbzColumn(dbzColumn),
+                dbzColumn.comment(),
+                dbzColumn.defaultValueExpression().orElse(null));
     }
 
     private com.ververica.cdc.common.event.TableId toCdcTableId(TableId dbzTableId) {

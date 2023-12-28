@@ -37,9 +37,14 @@ public abstract class Column implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    protected static final String FIELD_FORMAT_WITH_DESCRIPTION = "%s %s '%s'";
+    protected static final String FIELD_FORMAT_WITH_DESCRIPTION_NO_DEFAULT_VALUE = "%s %s '%s'";
 
-    protected static final String FIELD_FORMAT_NO_DESCRIPTION = "%s %s";
+    protected static final String FIELD_FORMAT_NO_DESCRIPTION_WITH_DEFAULT_VALUE = "%s %s '%s'";
+
+    protected static final String FIELD_FORMAT_WITH_DESCRIPTION_WITH_DEFAULT_VALUE =
+            "%s %s '%s' '%s'";
+
+    protected static final String FIELD_FORMAT_NO_DESCRIPTION_NO_DEFAULT_VALUE = "%s %s";
 
     protected final String name;
 
@@ -47,10 +52,21 @@ public abstract class Column implements Serializable {
 
     protected final @Nullable String comment;
 
+    protected final @Nullable String defaultValue;
+
     protected Column(String name, DataType type, @Nullable String comment) {
         this.name = name;
         this.type = type;
         this.comment = comment;
+        this.defaultValue = null;
+    }
+
+    protected Column(
+            String name, DataType type, @Nullable String comment, @Nullable String defaultValue) {
+        this.name = name;
+        this.type = type;
+        this.comment = comment;
+        this.defaultValue = defaultValue;
     }
 
     /** Returns the name of this column. */
@@ -68,17 +84,41 @@ public abstract class Column implements Serializable {
         return comment;
     }
 
+    @Nullable
+    public String getDefaultValue() {
+        return defaultValue;
+    }
+
     /** Returns a string that summarizes this column for printing to a console. */
     public String asSummaryString() {
         if (comment == null) {
-            return String.format(
-                    FIELD_FORMAT_NO_DESCRIPTION, escapeIdentifier(name), type.asSummaryString());
+            if (defaultValue == null) {
+                return String.format(
+                        FIELD_FORMAT_NO_DESCRIPTION_NO_DEFAULT_VALUE,
+                        escapeIdentifier(name),
+                        type.asSummaryString());
+            } else {
+                return String.format(
+                        FIELD_FORMAT_NO_DESCRIPTION_WITH_DEFAULT_VALUE,
+                        escapeIdentifier(name),
+                        type.asSummaryString(),
+                        defaultValue);
+            }
         } else {
-            return String.format(
-                    FIELD_FORMAT_WITH_DESCRIPTION,
-                    escapeIdentifier(name),
-                    type.asSummaryString(),
-                    escapeSingleQuotes(comment));
+            if (defaultValue == null) {
+                return String.format(
+                        FIELD_FORMAT_WITH_DESCRIPTION_NO_DEFAULT_VALUE,
+                        escapeIdentifier(name),
+                        type.asSummaryString(),
+                        escapeSingleQuotes(comment));
+            } else {
+                return String.format(
+                        FIELD_FORMAT_WITH_DESCRIPTION_WITH_DEFAULT_VALUE,
+                        escapeIdentifier(name),
+                        type.asSummaryString(),
+                        escapeSingleQuotes(comment),
+                        defaultValue);
+            }
         }
     }
 
@@ -102,17 +142,24 @@ public abstract class Column implements Serializable {
         Column column = (Column) o;
         return name.equals(column.name)
                 && type.equals(column.type)
-                && Objects.equals(comment, column.comment);
+                && Objects.equals(comment, column.comment)
+                && Objects.equals(defaultValue, column.defaultValue);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, type, comment);
+        return Objects.hash(name, type, comment, defaultValue);
     }
 
     @Override
     public String toString() {
         return asSummaryString();
+    }
+
+    /** Creates a physical column. */
+    public static PhysicalColumn physicalColumn(
+            String name, DataType type, @Nullable String comment, @Nullable String defaultValue) {
+        return new PhysicalColumn(name, type, comment, defaultValue);
     }
 
     /** Creates a physical column. */
