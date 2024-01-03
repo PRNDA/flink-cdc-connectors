@@ -52,14 +52,14 @@ Pipeline 连接器配置项
       <td>required</td>
       <td style="word-wrap: break-word;">(none)</td>
       <td>String</td>
-      <td>指定要使用的连接器, 这里需要设置成 <code>'kafka'</code>.</td>
+      <td>指定要使用的连接器, 这里需要设置成 <code>'kafka'</code>。 </td>
     </tr>
     <tr>
       <td>name</td>
       <td>optional</td>
       <td style="word-wrap: break-word;">(none)</td>
       <td>String</td>
-      <td>Sink 的名称.</td>
+      <td>Sink 的名称。 </td>
     </tr>
     <tr>
       <td>value.format</td>
