@@ -16,6 +16,8 @@
 
 package com.ververica.cdc.cli;
 
+import org.apache.flink.runtime.jobgraph.RestoreMode;
+
 import org.apache.flink.shaded.guava31.com.google.common.io.Resources;
 
 import com.ververica.cdc.composer.PipelineComposer;
@@ -84,6 +86,23 @@ class CliFrontendTest {
     }
 
     @Test
+    void testSavePointConfiguration() throws Exception {
+        CliExecutor executor =
+                createExecutor(
+                        pipelineDef(),
+                        "--flink-home",
+                        flinkHome(),
+                        "-s",
+                        flinkHome() + "/savepoints/savepoint-1",
+                        "-rm",
+                        "no_claim");
+        assertThat(executor.getSavepointSettings().getRestorePath())
+                .isEqualTo(flinkHome() + "/savepoints/savepoint-1");
+        assertThat(executor.getSavepointSettings().getRestoreMode())
+                .isEqualTo(RestoreMode.NO_CLAIM);
+    }
+
+    @Test
     void testAdditionalJar() throws Exception {
         String aJar = "/foo/jar/a.jar";
         String bJar = "/foo/jar/b.jar";
@@ -137,6 +156,16 @@ class CliFrontendTest {
                     + "                               CDC pipelines\n"
                     + "    -h,--help                  Display help message\n"
                     + "       --jar <arg>             JARs to be submitted together with the pipeline\n"
+                    + "    -rm,--restoreMode <arg>    Defines how should we restore from the given\n"
+                    + "                               savepoint. Supported options: [claim - claim\n"
+                    + "                               ownership of the savepoint and delete once it is\n"
+                    + "                               subsumed, no_claim (default) - do not claim\n"
+                    + "                               ownership, the first checkpoint will not reuse\n"
+                    + "                               any files from the restored one, legacy - the old\n"
+                    + "                               behaviour, do not assume ownership of the\n"
+                    + "                               savepoint files, but can reuse some shared files\n"
+                    + "    -s,--fromSavepoint <arg>   Path to a savepoint to restore the job from (for\n"
+                    + "                               example hdfs:///flink/savepoint-1537\n"
                     + "       --use-mini-cluster      Use Flink MiniCluster to run the pipeline\n";
 
     private static class NoOpComposer implements PipelineComposer {

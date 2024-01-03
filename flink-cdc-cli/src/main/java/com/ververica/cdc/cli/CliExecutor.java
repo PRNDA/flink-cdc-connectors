@@ -16,6 +16,8 @@
 
 package com.ververica.cdc.cli;
 
+import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings;
+
 import com.ververica.cdc.cli.parser.PipelineDefinitionParser;
 import com.ververica.cdc.cli.parser.YamlPipelineDefinitionParser;
 import com.ververica.cdc.cli.utils.FlinkEnvironmentUtils;
@@ -39,17 +41,21 @@ public class CliExecutor {
 
     private PipelineComposer composer = null;
 
+    private final SavepointRestoreSettings savepointSettings;
+
     public CliExecutor(
             Path pipelineDefPath,
             Configuration flinkConfig,
             Configuration globalPipelineConfig,
             boolean useMiniCluster,
-            List<Path> additionalJars) {
+            List<Path> additionalJars,
+            SavepointRestoreSettings savepointSettings) {
         this.pipelineDefPath = pipelineDefPath;
         this.flinkConfig = flinkConfig;
         this.globalPipelineConfig = globalPipelineConfig;
         this.useMiniCluster = useMiniCluster;
         this.additionalJars = additionalJars;
+        this.savepointSettings = savepointSettings;
     }
 
     public PipelineExecution.ExecutionInfo run() throws Exception {
@@ -59,7 +65,7 @@ public class CliExecutor {
                 pipelineDefinitionParser.parse(pipelineDefPath, globalPipelineConfig);
 
         // Create composer
-        PipelineComposer composer = getComposer(flinkConfig);
+        PipelineComposer composer = getComposer();
 
         // Compose pipeline
         PipelineExecution execution = composer.compose(pipelineDef);
@@ -68,10 +74,10 @@ public class CliExecutor {
         return execution.execute();
     }
 
-    private PipelineComposer getComposer(Configuration flinkConfig) {
+    private PipelineComposer getComposer() {
         if (composer == null) {
             return FlinkEnvironmentUtils.createComposer(
-                    useMiniCluster, flinkConfig, additionalJars);
+                    useMiniCluster, flinkConfig, additionalJars, savepointSettings);
         }
         return composer;
     }
@@ -94,5 +100,9 @@ public class CliExecutor {
     @VisibleForTesting
     public List<Path> getAdditionalJars() {
         return additionalJars;
+    }
+
+    public SavepointRestoreSettings getSavepointSettings() {
+        return savepointSettings;
     }
 }

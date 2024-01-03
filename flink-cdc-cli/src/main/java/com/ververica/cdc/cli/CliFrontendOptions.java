@@ -52,12 +52,35 @@ public class CliFrontendOptions {
                     .desc("Use Flink MiniCluster to run the pipeline")
                     .build();
 
+    public static final Option SAVEPOINT_PATH_OPTION =
+            Option.builder("s")
+                    .longOpt("fromSavepoint")
+                    .hasArg(true)
+                    .desc(
+                            "Path to a savepoint to restore the job from (for example hdfs:///flink/savepoint-1537")
+                    .build();
+
+    public static final Option SAVEPOINT_RESTORE_MODE =
+            Option.builder("rm")
+                    .longOpt("restoreMode")
+                    .hasArg(true)
+                    .desc(
+                            "Defines how should we restore from the given savepoint. Supported options: "
+                                    + "[claim - claim ownership of the savepoint and delete once it is"
+                                    + " subsumed, no_claim (default) - do not claim ownership, the first"
+                                    + " checkpoint will not reuse any files from the restored one, legacy "
+                                    + "- the old behaviour, do not assume ownership of the savepoint files,"
+                                    + " but can reuse some shared files")
+                    .build();
+
     public static Options initializeOptions() {
         return new Options()
                 .addOption(HELP)
                 .addOption(JAR)
                 .addOption(FLINK_HOME)
                 .addOption(GLOBAL_CONFIG)
-                .addOption(USE_MINI_CLUSTER);
+                .addOption(USE_MINI_CLUSTER)
+                .addOption(SAVEPOINT_PATH_OPTION)
+                .addOption(SAVEPOINT_RESTORE_MODE);
     }
 }
