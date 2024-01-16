@@ -66,7 +66,7 @@ Pipeline 连接器配置项
       <td>optional</td>
       <td style="word-wrap: break-word;">(none)</td>
       <td>String</td>
-      <td>用于序列化 Kafka 消息的值部分数据的格式。</td>
+      <td>用于序列化 Kafka 消息的值部分数据的格式。可选的填写值包括 <a href="https://debezium.io/documentation/reference/stable/integrations/serdes.html">debezium-json</a> 和 <a href="https://github.com/alibaba/canal/wiki">canal-json</a>, 默认值为 `debezium-json`，并且目前不支持用户自定义输出格式。 </td>
     </tr>
     <tr>
       <td>properties.bootstrap.servers</td>

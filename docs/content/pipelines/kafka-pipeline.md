@@ -64,7 +64,7 @@ Pipeline Connector Options
       <td>optional</td>
       <td style="word-wrap: break-word;">(none)</td>
       <td>String</td>
-      <td>The format used to serialize the value part of Kafka messages. </td>
+      <td>The format used to serialize the value part of Kafka messages. Available options are <a href="https://debezium.io/documentation/reference/stable/integrations/serdes.html">debezium-json</a> and <a href="https://github.com/alibaba/canal/wiki">canal-json</a>, default option is `debezium-json`, and do not support user-defined format now. </td>
     </tr>
     <tr>
       <td>properties.bootstrap.servers</td>
