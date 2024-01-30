@@ -43,11 +43,11 @@ public class PhysicalColumn extends Column {
 
     @Override
     public Column copy(DataType newType) {
-        return new PhysicalColumn(name, newType, comment, defaultValue);
+        return new PhysicalColumn(name, newType, comment, defaultValueExpression);
     }
 
     @Override
     public Column copy(String newName) {
-        return new PhysicalColumn(newName, type, comment, defaultValue);
+        return new PhysicalColumn(newName, type, comment, defaultValueExpression);
     }
 }

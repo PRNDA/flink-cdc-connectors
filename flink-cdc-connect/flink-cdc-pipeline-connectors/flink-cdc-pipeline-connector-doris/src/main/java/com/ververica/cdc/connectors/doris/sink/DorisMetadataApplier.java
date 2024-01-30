@@ -133,7 +133,7 @@ public class DorisMetadataApplier implements MetadataApplier {
                     new FieldSchema(
                             column.getName(),
                             typeString,
-                            column.getDefaultValue(),
+                            column.getDefaultValueExpression(),
                             column.getComment()));
         }
         return fieldSchemaMap;
@@ -171,7 +171,7 @@ public class DorisMetadataApplier implements MetadataApplier {
                     new FieldSchema(
                             column.getName(),
                             typeString,
-                            column.getDefaultValue(),
+                            column.getDefaultValueExpression(),
                             column.getComment());
             schemaChangeManager.addColumn(
                     tableId.getSchemaName(), tableId.getTableName(), addFieldSchema);

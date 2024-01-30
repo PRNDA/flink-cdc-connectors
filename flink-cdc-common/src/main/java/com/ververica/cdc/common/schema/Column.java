@@ -37,14 +37,16 @@ public abstract class Column implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    protected static final String FIELD_FORMAT_WITH_DESCRIPTION_NO_DEFAULT_VALUE = "%s %s '%s'";
+    protected static final String FIELD_FORMAT_WITH_DESCRIPTION_NO_DEFAULT_VALUE_EXPRESSION =
+            "%s %s '%s'";
 
-    protected static final String FIELD_FORMAT_NO_DESCRIPTION_WITH_DEFAULT_VALUE = "%s %s '%s'";
+    protected static final String FIELD_FORMAT_NO_DESCRIPTION_WITH_DEFAULT_VALUE_EXPRESSION =
+            "%s %s '%s'";
 
-    protected static final String FIELD_FORMAT_WITH_DESCRIPTION_WITH_DEFAULT_VALUE =
+    protected static final String FIELD_FORMAT_WITH_DESCRIPTION_WITH_DEFAULT_VALUE_EXPRESSION =
             "%s %s '%s' '%s'";
 
-    protected static final String FIELD_FORMAT_NO_DESCRIPTION_NO_DEFAULT_VALUE = "%s %s";
+    protected static final String FIELD_FORMAT_NO_DESCRIPTION_NO_DEFAULT_VALUE_EXPRESSION = "%s %s";
 
     protected final String name;
 
@@ -52,21 +54,24 @@ public abstract class Column implements Serializable {
 
     protected final @Nullable String comment;
 
-    protected final @Nullable String defaultValue;
+    protected final @Nullable String defaultValueExpression;
 
     protected Column(String name, DataType type, @Nullable String comment) {
         this.name = name;
         this.type = type;
         this.comment = comment;
-        this.defaultValue = null;
+        this.defaultValueExpression = null;
     }
 
     protected Column(
-            String name, DataType type, @Nullable String comment, @Nullable String defaultValue) {
+            String name,
+            DataType type,
+            @Nullable String comment,
+            @Nullable String defaultValueExpression) {
         this.name = name;
         this.type = type;
         this.comment = comment;
-        this.defaultValue = defaultValue;
+        this.defaultValueExpression = defaultValueExpression;
     }
 
     /** Returns the name of this column. */
@@ -85,39 +90,39 @@ public abstract class Column implements Serializable {
     }
 
     @Nullable
-    public String getDefaultValue() {
-        return defaultValue;
+    public String getDefaultValueExpression() {
+        return defaultValueExpression;
     }
 
     /** Returns a string that summarizes this column for printing to a console. */
     public String asSummaryString() {
         if (comment == null) {
-            if (defaultValue == null) {
+            if (defaultValueExpression == null) {
                 return String.format(
-                        FIELD_FORMAT_NO_DESCRIPTION_NO_DEFAULT_VALUE,
+                        FIELD_FORMAT_NO_DESCRIPTION_NO_DEFAULT_VALUE_EXPRESSION,
                         escapeIdentifier(name),
                         type.asSummaryString());
             } else {
                 return String.format(
-                        FIELD_FORMAT_NO_DESCRIPTION_WITH_DEFAULT_VALUE,
+                        FIELD_FORMAT_NO_DESCRIPTION_WITH_DEFAULT_VALUE_EXPRESSION,
                         escapeIdentifier(name),
                         type.asSummaryString(),
-                        defaultValue);
+                        defaultValueExpression);
             }
         } else {
-            if (defaultValue == null) {
+            if (defaultValueExpression == null) {
                 return String.format(
-                        FIELD_FORMAT_WITH_DESCRIPTION_NO_DEFAULT_VALUE,
+                        FIELD_FORMAT_WITH_DESCRIPTION_NO_DEFAULT_VALUE_EXPRESSION,
                         escapeIdentifier(name),
                         type.asSummaryString(),
                         escapeSingleQuotes(comment));
             } else {
                 return String.format(
-                        FIELD_FORMAT_WITH_DESCRIPTION_WITH_DEFAULT_VALUE,
+                        FIELD_FORMAT_WITH_DESCRIPTION_WITH_DEFAULT_VALUE_EXPRESSION,
                         escapeIdentifier(name),
                         type.asSummaryString(),
                         escapeSingleQuotes(comment),
-                        defaultValue);
+                        defaultValueExpression);
             }
         }
     }
@@ -143,12 +148,12 @@ public abstract class Column implements Serializable {
         return name.equals(column.name)
                 && type.equals(column.type)
                 && Objects.equals(comment, column.comment)
-                && Objects.equals(defaultValue, column.defaultValue);
+                && Objects.equals(defaultValueExpression, column.defaultValueExpression);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, type, comment, defaultValue);
+        return Objects.hash(name, type, comment, defaultValueExpression);
     }
 
     @Override
@@ -158,8 +163,11 @@ public abstract class Column implements Serializable {
 
     /** Creates a physical column. */
     public static PhysicalColumn physicalColumn(
-            String name, DataType type, @Nullable String comment, @Nullable String defaultValue) {
-        return new PhysicalColumn(name, type, comment, defaultValue);
+            String name,
+            DataType type,
+            @Nullable String comment,
+            @Nullable String defaultValueExpression) {
+        return new PhysicalColumn(name, type, comment, defaultValueExpression);
     }
 
     /** Creates a physical column. */
