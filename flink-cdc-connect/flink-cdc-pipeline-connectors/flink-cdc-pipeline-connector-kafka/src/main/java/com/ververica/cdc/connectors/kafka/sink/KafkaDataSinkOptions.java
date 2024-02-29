@@ -76,5 +76,5 @@ public class KafkaDataSinkOptions {
                     .booleanType()
                     .defaultValue(false)
                     .withDescription(
-                            "Optional. If this parameter is configured, a header that the key is 'tableId' and the value is will be added for each Kafka record.");
+                            "Optional. If this parameter is configured, a header with key of 'namespace','schemaName','tableName' will be added for each Kafka record.");
 }

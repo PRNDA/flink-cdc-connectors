@@ -48,7 +48,11 @@ public class PipelineKafkaRecordSerializationSchema
 
     private final boolean addTableToHeaderEnabled;
 
-    public static final String TABLEID_HEADER_KEY = "tableId";
+    public static final String NAMESPACE_HEADER_KEY = "namespace";
+
+    public static final String SCHEMA_NAME_HEADER_KEY = "schemaName";
+
+    public static final String TABLE_NAME_HEADER_KEY = "tableName";
 
     PipelineKafkaRecordSerializationSchema(
             @Nullable FlinkKafkaPartitioner<Event> partitioner,
@@ -73,13 +77,27 @@ public class PipelineKafkaRecordSerializationSchema
         String topic = unifiedTopic == null ? changeEvent.tableId().toString() : unifiedTopic;
         RecordHeaders recordHeaders = new RecordHeaders();
         if (addTableToHeaderEnabled) {
+            String namespace =
+                    changeEvent.tableId().getNamespace() == null
+                            ? ""
+                            : changeEvent.tableId().getNamespace();
             recordHeaders.add(
                     new RecordHeader(
-                            TABLEID_HEADER_KEY,
-                            changeEvent
-                                    .tableId()
-                                    .toString()
-                                    .getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+                            NAMESPACE_HEADER_KEY,
+                            namespace.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+            String schemaName =
+                    changeEvent.tableId().getSchemaName() == null
+                            ? ""
+                            : changeEvent.tableId().getSchemaName();
+            recordHeaders.add(
+                    new RecordHeader(
+                            SCHEMA_NAME_HEADER_KEY,
+                            schemaName.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+            String tableName = changeEvent.tableId().getTableName();
+            recordHeaders.add(
+                    new RecordHeader(
+                            TABLE_NAME_HEADER_KEY,
+                            tableName.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
         }
         return new ProducerRecord<>(
                 topic,

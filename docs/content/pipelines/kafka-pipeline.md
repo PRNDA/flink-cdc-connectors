@@ -85,7 +85,7 @@ Pipeline Connector Options
       <td>optional</td>
       <td style="word-wrap: break-word;">(none)</td>
       <td>Boolean</td>
-      <td>If this parameter is true, a header that the key is 'tableId' and the value is will be added for each Kafka record. Default value is false.</td>
+      <td>If this parameter is true, a header with key of 'namespace','schemaName','tableName' will be added for each Kafka record. Default value is false.</td>
     </tr>
     <tr>
       <td>table.properties.*</td>

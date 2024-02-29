@@ -87,7 +87,7 @@ Pipeline 连接器配置项
       <td>optional</td>
       <td style="word-wrap: break-word;">(none)</td>
       <td>Boolean</td>
-      <td>如果配置了这个参数，所有的消息都会带上一个键为 `tableId`，值为事件对应的 TableId 字符串的 header。</td>
+      <td>如果配置了这个参数，所有的消息都会带上键为 `namespace`, 'schemaName', 'tableName'，值为事件 TableId 里对应的 字符串的 header。</td>
     </tr>
     <tr>
       <td>properties.*</td>

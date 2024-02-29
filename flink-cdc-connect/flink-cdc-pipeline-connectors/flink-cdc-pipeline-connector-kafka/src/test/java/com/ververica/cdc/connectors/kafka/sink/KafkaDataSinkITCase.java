@@ -209,10 +209,7 @@ public class KafkaDataSinkITCase extends TestLogger {
 
         // drop column
         DropColumnEvent dropColumnEvent =
-                new DropColumnEvent(
-                        table1,
-                        Collections.singletonList(
-                                Column.physicalColumn("newCol2", DataTypes.STRING())));
+                new DropColumnEvent(table1, Collections.singletonList("newCol2"));
         events.add(dropColumnEvent);
 
         // delete
@@ -330,7 +327,7 @@ public class KafkaDataSinkITCase extends TestLogger {
                                     .headers()
                                     .headers(
                                             PipelineKafkaRecordSerializationSchema
-                                                    .TABLEID_HEADER_KEY)
+                                                    .TABLE_NAME_HEADER_KEY)
                                     .iterator()
                                     .hasNext()
                             == false);
@@ -393,11 +390,33 @@ public class KafkaDataSinkITCase extends TestLogger {
                                             .headers()
                                             .headers(
                                                     PipelineKafkaRecordSerializationSchema
-                                                            .TABLEID_HEADER_KEY)
+                                                            .NAMESPACE_HEADER_KEY)
                                             .iterator()
                                             .next()
                                             .value())
-                            .equals(table1.toString()));
+                            .equals(table1.getNamespace()));
+            assertThat(
+                    new String(
+                                    consumerRecord
+                                            .headers()
+                                            .headers(
+                                                    PipelineKafkaRecordSerializationSchema
+                                                            .SCHEMA_NAME_HEADER_KEY)
+                                            .iterator()
+                                            .next()
+                                            .value())
+                            .equals(table1.getSchemaName()));
+            assertThat(
+                    new String(
+                                    consumerRecord
+                                            .headers()
+                                            .headers(
+                                                    PipelineKafkaRecordSerializationSchema
+                                                            .TABLE_NAME_HEADER_KEY)
+                                            .iterator()
+                                            .next()
+                                            .value())
+                            .equals(table1.getTableName()));
         }
         ObjectMapper mapper =
                 JacksonMapperFactory.createObjectMapper()
