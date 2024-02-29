@@ -76,6 +76,20 @@ Pipeline 连接器配置项
       <td>用于建立与 Kafka 集群初始连接的主机/端口对列表。</td>
     </tr>
     <tr>
+      <td>topic</td>
+      <td>optional</td>
+      <td style="word-wrap: break-word;">(none)</td>
+      <td>String</td>
+      <td>如果配置了这个参数，所有的消息都会发送到这一个主题。</td>
+    </tr>
+    <tr>
+      <td>sink.add-tableId-to-header-enabled</td>
+      <td>optional</td>
+      <td style="word-wrap: break-word;">(none)</td>
+      <td>Boolean</td>
+      <td>如果配置了这个参数，所有的消息都会带上一个键为 `tableId`，值为事件对应的 TableId 字符串的 header。</td>
+    </tr>
+    <tr>
       <td>properties.*</td>
       <td>optional</td>
       <td style="word-wrap: break-word;">(none)</td>
@@ -90,7 +104,7 @@ Pipeline 连接器配置项
 --------
 
 * 写入 Kafka 的 topic 默认会是上游表 `namespace.schemaName.tableName` 对应的字符串，可以通过 pipeline 的 route 功能进行修改。
-
+* 如果配置了 `topic` 参数，所有的消息都会发送到这一个主题。
 * 写入 Kafka 的 topic 如果不存在，则会默认创建。
 
 数据类型映射

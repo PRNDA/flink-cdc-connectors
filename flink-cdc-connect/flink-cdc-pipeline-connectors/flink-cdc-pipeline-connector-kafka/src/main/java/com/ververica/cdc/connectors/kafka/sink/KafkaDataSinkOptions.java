@@ -63,4 +63,18 @@ public class KafkaDataSinkOptions {
                                             text(
                                                     "custom class name (use custom FlinkKafkaPartitioner subclass)"))
                                     .build());
+
+    public static final ConfigOption<String> TOPIC =
+            key("topic")
+                    .stringType()
+                    .noDefaultValue()
+                    .withDescription(
+                            "Optional. If this parameter is configured, all events will be sent to this topic.");
+
+    public static final ConfigOption<Boolean> SINK_ADD_TABLEID_TO_HEADER_ENABLED =
+            key("sink.add-tableId-to-header-enabled")
+                    .booleanType()
+                    .defaultValue(false)
+                    .withDescription(
+                            "Optional. If this parameter is configured, a header that the key is 'tableId' and the value is will be added for each Kafka record.");
 }

@@ -25,6 +25,8 @@ import com.ververica.cdc.common.event.Event;
 import com.ververica.cdc.common.event.SchemaChangeEvent;
 import com.ververica.cdc.common.event.TableId;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.header.internals.RecordHeader;
+import org.apache.kafka.common.header.internals.RecordHeaders;
 
 import javax.annotation.Nullable;
 
@@ -42,29 +44,51 @@ public class PipelineKafkaRecordSerializationSchema
     private final FlinkKafkaPartitioner<Event> partitioner;
     private final SerializationSchema<Event> valueSerialization;
 
+    private final String unifiedTopic;
+
+    private final boolean addTableToHeaderEnabled;
+
+    public static final String TABLEID_HEADER_KEY = "tableId";
+
     PipelineKafkaRecordSerializationSchema(
             @Nullable FlinkKafkaPartitioner<Event> partitioner,
-            SerializationSchema<Event> valueSerialization) {
+            SerializationSchema<Event> valueSerialization,
+            String unifiedTopic,
+            boolean addTableToHeaderEnabled) {
         this.partitioner = partitioner;
         this.valueSerialization = checkNotNull(valueSerialization);
+        this.unifiedTopic = unifiedTopic;
+        this.addTableToHeaderEnabled = addTableToHeaderEnabled;
     }
 
     @Override
     public ProducerRecord<byte[], byte[]> serialize(
             Event event, KafkaSinkContext context, Long timestamp) {
         ChangeEvent changeEvent = (ChangeEvent) event;
-        String topic = changeEvent.tableId().toString();
         final byte[] valueSerialized = valueSerialization.serialize(event);
         if (event instanceof SchemaChangeEvent) {
             // skip sending SchemaChangeEvent.
             return null;
+        }
+        String topic = unifiedTopic == null ? changeEvent.tableId().toString() : unifiedTopic;
+        RecordHeaders recordHeaders = new RecordHeaders();
+        if (addTableToHeaderEnabled) {
+            recordHeaders.add(
+                    new RecordHeader(
+                            TABLEID_HEADER_KEY,
+                            changeEvent
+                                    .tableId()
+                                    .toString()
+                                    .getBytes(java.nio.charset.StandardCharsets.UTF_8)));
         }
         return new ProducerRecord<>(
                 topic,
                 extractPartition(
                         changeEvent, valueSerialized, context.getPartitionsForTopic(topic)),
                 null,
-                valueSerialized);
+                null,
+                valueSerialized,
+                recordHeaders);
     }
 
     @Override

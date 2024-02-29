@@ -78,8 +78,18 @@ public class KafkaDataSinkFactory implements DataSinkFactory {
                             final String subKey = key.substring((PROPERTIES_PREFIX).length());
                             kafkaProperties.put(subKey, value);
                         });
+        String topic = context.getFactoryConfiguration().get(KafkaDataSinkOptions.TOPIC);
+        boolean addTableToHeaderEnabled =
+                context.getFactoryConfiguration()
+                        .get(KafkaDataSinkOptions.SINK_ADD_TABLEID_TO_HEADER_ENABLED);
         return new KafkaDataSink(
-                deliveryGuarantee, kafkaProperties, partitioner, zoneId, valueSerialization);
+                deliveryGuarantee,
+                kafkaProperties,
+                partitioner,
+                zoneId,
+                valueSerialization,
+                topic,
+                addTableToHeaderEnabled);
     }
 
     @Override
@@ -97,6 +107,8 @@ public class KafkaDataSinkFactory implements DataSinkFactory {
         Set<ConfigOption<?>> options = new HashSet<>();
         options.add(KafkaDataSinkOptions.DELIVERY_GUARANTEE);
         options.add(KafkaDataSinkOptions.SINK_PARTITIONER);
+        options.add(KafkaDataSinkOptions.TOPIC);
+        options.add(KafkaDataSinkOptions.SINK_ADD_TABLEID_TO_HEADER_ENABLED);
         return options;
     }
 }

@@ -74,6 +74,20 @@ Pipeline Connector Options
       <td>A list of host/port pairs to use for establishing the initial connection to the Kafka cluster.</td>
     </tr>
     <tr>
+      <td>topic</td>
+      <td>optional</td>
+      <td style="word-wrap: break-word;">(none)</td>
+      <td>String</td>
+      <td>If this parameter is configured, all events will be sent to this topic.</td>
+    </tr>
+    <tr>
+      <td>sink.add-tableId-to-header-enabled</td>
+      <td>optional</td>
+      <td style="word-wrap: break-word;">(none)</td>
+      <td>Boolean</td>
+      <td>If this parameter is true, a header that the key is 'tableId' and the value is will be added for each Kafka record. Default value is false.</td>
+    </tr>
+    <tr>
       <td>table.properties.*</td>
       <td>optional</td>
       <td style="word-wrap: break-word;">(none)</td>

@@ -324,6 +324,17 @@ public class KafkaDataSinkITCase extends TestLogger {
                 drainAllRecordsFromTopic(topic, false);
         final long recordsCount = 5;
         assertThat(recordsCount).isEqualTo(collectedRecords.size());
+        for (ConsumerRecord<byte[], byte[]> consumerRecord : collectedRecords) {
+            assertThat(
+                    consumerRecord
+                                    .headers()
+                                    .headers(
+                                            PipelineKafkaRecordSerializationSchema
+                                                    .TABLEID_HEADER_KEY)
+                                    .iterator()
+                                    .hasNext()
+                            == false);
+        }
         ObjectMapper mapper =
                 JacksonMapperFactory.createObjectMapper()
                         .configure(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN, false);
@@ -339,6 +350,70 @@ public class KafkaDataSinkITCase extends TestLogger {
                                 "{\"old\":[{\"f0\":\"1\",\"f1\":\"1\"}],\"data\":null,\"type\":\"DELETE\"}"),
                         mapper.readTree(
                                 "{\"old\":[{\"f0\":\"2\",\"f1\":\"\"}],\"data\":[{\"f0\":\"2\",\"f1\":\"x\"}],\"type\":\"UPDATE\"}"));
+        Assert.assertTrue(deserializeValues(collectedRecords).containsAll(expected));
+        checkProducerLeak();
+    }
+
+    @Test
+    public void testTopicAndHeaderOption() throws Exception {
+        final StreamExecutionEnvironment env = new LocalStreamEnvironment();
+        env.enableCheckpointing(1000L);
+        env.setRestartStrategy(RestartStrategies.noRestart());
+        final DataStream<Event> source =
+                env.fromCollection(createSourceEvents(), new EventTypeInfo());
+        Map<String, String> config = new HashMap<>();
+        config.put(KafkaDataSinkOptions.TOPIC.key(), "test_topic");
+        config.put(KafkaDataSinkOptions.SINK_ADD_TABLEID_TO_HEADER_ENABLED.key(), "true");
+        Properties properties = getKafkaClientConfiguration();
+        properties.forEach(
+                (key, value) ->
+                        config.put(
+                                KafkaDataSinkOptions.PROPERTIES_PREFIX + key.toString(),
+                                value.toString()));
+        source.sinkTo(
+                ((FlinkSinkProvider)
+                                (new KafkaDataSinkFactory()
+                                        .createDataSink(
+                                                new FactoryHelper.DefaultContext(
+                                                        Configuration.fromMap(config),
+                                                        Configuration.fromMap(new HashMap<>()),
+                                                        this.getClass().getClassLoader()))
+                                        .getEventSinkProvider()))
+                        .getSink());
+        env.execute();
+
+        final List<ConsumerRecord<byte[], byte[]>> collectedRecords =
+                drainAllRecordsFromTopic("test_topic", false);
+        final long recordsCount = 5;
+        assertThat(recordsCount).isEqualTo(collectedRecords.size());
+        for (ConsumerRecord<byte[], byte[]> consumerRecord : collectedRecords) {
+            assertThat(
+                    new String(
+                                    consumerRecord
+                                            .headers()
+                                            .headers(
+                                                    PipelineKafkaRecordSerializationSchema
+                                                            .TABLEID_HEADER_KEY)
+                                            .iterator()
+                                            .next()
+                                            .value())
+                            .equals(table1.toString()));
+        }
+        ObjectMapper mapper =
+                JacksonMapperFactory.createObjectMapper()
+                        .configure(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN, false);
+        List<JsonNode> expected =
+                Arrays.asList(
+                        mapper.readTree(
+                                "{\"before\":null,\"after\":{\"f0\":\"1\",\"f1\":\"1\"},\"op\":\"c\"}"),
+                        mapper.readTree(
+                                "{\"before\":null,\"after\":{\"f0\":\"2\",\"f1\":\"2\"},\"op\":\"c\"}"),
+                        mapper.readTree(
+                                "{\"before\":null,\"after\":{\"f0\":\"3\",\"f1\":\"3\"},\"op\":\"c\"}"),
+                        mapper.readTree(
+                                "{\"before\":{\"f0\":\"1\",\"f1\":\"1\"},\"after\":null,\"op\":\"d\"}"),
+                        mapper.readTree(
+                                "{\"before\":{\"f0\":\"2\",\"f1\":\"\"},\"after\":{\"f0\":\"2\",\"f1\":\"x\"},\"op\":\"u\"}"));
         Assert.assertTrue(deserializeValues(collectedRecords).containsAll(expected));
         checkProducerLeak();
     }

@@ -45,17 +45,25 @@ public class KafkaDataSink implements DataSink {
 
     final SerializationSchema<Event> valueSerialization;
 
+    final String topic;
+
+    final boolean addTableToHeaderEnabled;
+
     public KafkaDataSink(
             DeliveryGuarantee deliveryGuarantee,
             Properties kafkaProperties,
             FlinkKafkaPartitioner<Event> partitioner,
             ZoneId zoneId,
-            SerializationSchema<Event> valueSerialization) {
+            SerializationSchema<Event> valueSerialization,
+            String topic,
+            boolean addTableToHeaderEnabled) {
         this.deliveryGuarantee = deliveryGuarantee;
         this.kafkaProperties = kafkaProperties;
         this.partitioner = partitioner;
         this.zoneId = zoneId;
         this.valueSerialization = valueSerialization;
+        this.topic = topic;
+        this.addTableToHeaderEnabled = addTableToHeaderEnabled;
     }
 
     @Override
@@ -71,7 +79,10 @@ public class KafkaDataSink implements DataSink {
                         .setKafkaProducerConfig(kafkaProperties)
                         .setRecordSerializer(
                                 new PipelineKafkaRecordSerializationSchema(
-                                        partitioner, valueSerialization))
+                                        partitioner,
+                                        valueSerialization,
+                                        topic,
+                                        addTableToHeaderEnabled))
                         .build());
     }
 
