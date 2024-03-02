@@ -110,6 +110,7 @@ public class MysqlE2eITCase extends PipelineTestEnvironment {
         Path valuesCdcJar = TestUtils.getResource("values-cdc-pipeline-connector.jar");
         submitPipelineJob(pipelineJob, mysqlCdcJar, valuesCdcJar);
         waitUntilJobRunning(Duration.ofSeconds(30));
+        LOG.info("Pipeline job is running");
         waitUtilSpecificEvent(
                 String.format(
                         "DataChangeEvent{tableId=%s.customers, before=[], after=[104, user_4, Shanghai, 123567891234], op=INSERT, meta=()}",
@@ -168,6 +169,7 @@ public class MysqlE2eITCase extends PipelineTestEnvironment {
                                 "DataChangeEvent{tableId=%s.products, before=[], after=[102, car battery, 12V car battery, 8.1, white, {\"key2\": \"value2\"}, {\"coordinates\":[2,2],\"type\":\"Point\",\"srid\":0}], op=INSERT, meta=()}",
                                 mysqlInventoryDatabase.getDatabaseName()));
         validateResult(expectedEvents);
+        LOG.info("Begin incremental reading stage.");
         // generate binlogs
         String mysqlJdbcUrl =
                 String.format(
