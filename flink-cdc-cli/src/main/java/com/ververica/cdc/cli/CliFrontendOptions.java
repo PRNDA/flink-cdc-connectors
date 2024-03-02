@@ -60,9 +60,9 @@ public class CliFrontendOptions {
                             "Path to a savepoint to restore the job from (for example hdfs:///flink/savepoint-1537")
                     .build();
 
-    public static final Option SAVEPOINT_RESTORE_MODE =
-            Option.builder("rm")
-                    .longOpt("restoreMode")
+    public static final Option SAVEPOINT_CLAIM_MODE =
+            Option.builder("cm")
+                    .longOpt("claimMode")
                     .hasArg(true)
                     .desc(
                             "Defines how should we restore from the given savepoint. Supported options: "
@@ -73,6 +73,16 @@ public class CliFrontendOptions {
                                     + " but can reuse some shared files")
                     .build();
 
+    public static final Option SAVEPOINT_ALLOW_NON_RESTORED_OPTION =
+            Option.builder("n")
+                    .longOpt("allowNonRestoredState")
+                    .hasArg(false)
+                    .desc(
+                            "Allow to skip savepoint state that cannot be restored. "
+                                    + "You need to allow this if you removed an operator from your "
+                                    + "program that was part of the program when the savepoint was triggered.")
+                    .build();
+
     public static Options initializeOptions() {
         return new Options()
                 .addOption(HELP)
@@ -81,6 +91,7 @@ public class CliFrontendOptions {
                 .addOption(GLOBAL_CONFIG)
                 .addOption(USE_MINI_CLUSTER)
                 .addOption(SAVEPOINT_PATH_OPTION)
-                .addOption(SAVEPOINT_RESTORE_MODE);
+                .addOption(SAVEPOINT_CLAIM_MODE)
+                .addOption(SAVEPOINT_ALLOW_NON_RESTORED_OPTION);
     }
 }

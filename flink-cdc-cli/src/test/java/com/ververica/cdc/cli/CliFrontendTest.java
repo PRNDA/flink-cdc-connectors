@@ -94,12 +94,14 @@ class CliFrontendTest {
                         flinkHome(),
                         "-s",
                         flinkHome() + "/savepoints/savepoint-1",
-                        "-rm",
-                        "no_claim");
+                        "-cm",
+                        "no_claim",
+                        "-n");
         assertThat(executor.getSavepointSettings().getRestorePath())
                 .isEqualTo(flinkHome() + "/savepoints/savepoint-1");
         assertThat(executor.getSavepointSettings().getRestoreMode())
                 .isEqualTo(RestoreMode.NO_CLAIM);
+        assertThat(executor.getSavepointSettings().allowNonRestoredState()).isTrue();
     }
 
     @Test
@@ -151,22 +153,27 @@ class CliFrontendTest {
 
     private static final String HELP_MESSAGE =
             "usage:\n"
-                    + "       --flink-home <arg>      Path of Flink home directory\n"
-                    + "       --global-config <arg>   Path of the global configuration file for Flink\n"
-                    + "                               CDC pipelines\n"
-                    + "    -h,--help                  Display help message\n"
-                    + "       --jar <arg>             JARs to be submitted together with the pipeline\n"
-                    + "    -rm,--restoreMode <arg>    Defines how should we restore from the given\n"
-                    + "                               savepoint. Supported options: [claim - claim\n"
-                    + "                               ownership of the savepoint and delete once it is\n"
-                    + "                               subsumed, no_claim (default) - do not claim\n"
-                    + "                               ownership, the first checkpoint will not reuse\n"
-                    + "                               any files from the restored one, legacy - the old\n"
-                    + "                               behaviour, do not assume ownership of the\n"
-                    + "                               savepoint files, but can reuse some shared files\n"
-                    + "    -s,--fromSavepoint <arg>   Path to a savepoint to restore the job from (for\n"
-                    + "                               example hdfs:///flink/savepoint-1537\n"
-                    + "       --use-mini-cluster      Use Flink MiniCluster to run the pipeline\n";
+                    + "    -cm,--claimMode <arg>        Defines how should we restore from the given\n"
+                    + "                                 savepoint. Supported options: [claim - claim\n"
+                    + "                                 ownership of the savepoint and delete once it\n"
+                    + "                                 is subsumed, no_claim (default) - do not claim\n"
+                    + "                                 ownership, the first checkpoint will not reuse\n"
+                    + "                                 any files from the restored one, legacy - the\n"
+                    + "                                 old behaviour, do not assume ownership of the\n"
+                    + "                                 savepoint files, but can reuse some shared\n"
+                    + "                                 files\n"
+                    + "       --flink-home <arg>        Path of Flink home directory\n"
+                    + "       --global-config <arg>     Path of the global configuration file for Flink\n"
+                    + "                                 CDC pipelines\n"
+                    + "    -h,--help                    Display help message\n"
+                    + "       --jar <arg>               JARs to be submitted together with the pipeline\n"
+                    + "    -n,--allowNonRestoredState   Allow to skip savepoint state that cannot be\n"
+                    + "                                 restored. You need to allow this if you removed\n"
+                    + "                                 an operator from your program that was part of\n"
+                    + "                                 the program when the savepoint was triggered.\n"
+                    + "    -s,--fromSavepoint <arg>     Path to a savepoint to restore the job from\n"
+                    + "                                 (for example hdfs:///flink/savepoint-1537\n"
+                    + "       --use-mini-cluster        Use Flink MiniCluster to run the pipeline\n";
 
     private static class NoOpComposer implements PipelineComposer {
 
