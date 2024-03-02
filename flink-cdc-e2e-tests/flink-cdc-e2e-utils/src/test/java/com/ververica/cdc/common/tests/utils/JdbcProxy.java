@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.ververica.cdc.pipeline.tests.utils;
+package com.ververica.cdc.common.tests.utils;
 
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -26,9 +27,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
 
 /** Proxy to communicate with database using JDBC protocol. */
 public class JdbcProxy {
@@ -45,7 +43,7 @@ public class JdbcProxy {
         this.driverClass = driverClass;
     }
 
-    public void checkResult(List<String> expectedResult, String table, String[] fields)
+    private void checkResult(List<String> expectedResult, String table, String[] fields)
             throws SQLException, ClassNotFoundException {
         Class.forName(driverClass);
         try (Connection dbConn = DriverManager.getConnection(url, userName, password);
@@ -68,25 +66,14 @@ public class JdbcProxy {
             Collections.sort(results);
             Collections.sort(expectedResult);
             // make it easier to check the result
-            assertArrayEquals(expectedResult.toArray(), results.toArray());
+            Assert.assertArrayEquals(expectedResult.toArray(), results.toArray());
         }
     }
 
-    public void checkSize(int expectedSize, String table)
-            throws SQLException, ClassNotFoundException {
-        Class.forName(driverClass);
-        int actualSize = 0;
-        try (Connection dbConn = DriverManager.getConnection(url, userName, password);
-                PreparedStatement statement =
-                        dbConn.prepareStatement("SELECT COUNT(*) FROM " + table);
-                ResultSet resultSet = statement.executeQuery()) {
-            while (resultSet.next()) {
-                actualSize = resultSet.getInt(1);
-            }
-            assertEquals(expectedSize, actualSize);
-        }
-    }
-
+    /**
+     * Check the result of a table with specified fields. If the result is not as expected, it will
+     * retry until timeout.
+     */
     public void checkResultWithTimeout(
             List<String> expectedResult, String table, String[] fields, long timeout)
             throws Exception {
@@ -103,24 +90,6 @@ public class JdbcProxy {
         }
         if (!result) {
             checkResult(expectedResult, table, fields);
-        }
-    }
-
-    public void checkSizeWithTimeout(int expectedSize, String table, long timeout)
-            throws Exception {
-        long endTimeout = System.currentTimeMillis() + timeout;
-        boolean result = false;
-        while (System.currentTimeMillis() < endTimeout) {
-            try {
-                checkSize(expectedSize, table);
-                result = true;
-                break;
-            } catch (AssertionError | SQLException throwable) {
-                Thread.sleep(1000L);
-            }
-        }
-        if (!result) {
-            checkSize(expectedSize, table);
         }
     }
 }

@@ -16,9 +16,9 @@
 
 package com.ververica.cdc.connectors.tests;
 
+import com.ververica.cdc.common.tests.utils.JdbcProxy;
+import com.ververica.cdc.common.tests.utils.TestUtils;
 import com.ververica.cdc.connectors.tests.utils.FlinkContainerTestEnvironment;
-import com.ververica.cdc.connectors.tests.utils.JdbcProxy;
-import com.ververica.cdc.connectors.tests.utils.TestUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

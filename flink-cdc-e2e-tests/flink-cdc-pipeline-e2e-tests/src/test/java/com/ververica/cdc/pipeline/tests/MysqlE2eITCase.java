@@ -16,11 +16,11 @@
 
 package com.ververica.cdc.pipeline.tests;
 
+import com.ververica.cdc.common.tests.utils.TestUtils;
 import com.ververica.cdc.connectors.mysql.testutils.MySqlContainer;
 import com.ververica.cdc.connectors.mysql.testutils.MySqlVersion;
 import com.ververica.cdc.connectors.mysql.testutils.UniqueDatabase;
 import com.ververica.cdc.pipeline.tests.utils.PipelineTestEnvironment;
-import com.ververica.cdc.pipeline.tests.utils.TestUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -41,11 +41,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
-/**
- * Test environment running pipeline job on Flink containers.
- *
- * <p>Predefined a MySQL container for creating source events.
- */
+/** End-to-end tests for mysql cdc pipeline job. */
 @RunWith(Parameterized.class)
 public class MysqlE2eITCase extends PipelineTestEnvironment {
     private static final Logger LOG = LoggerFactory.getLogger(MysqlE2eITCase.class);

@@ -26,6 +26,7 @@ import org.apache.flink.runtime.client.JobStatusMessage;
 import org.apache.flink.table.api.ValidationException;
 import org.apache.flink.util.TestLogger;
 
+import com.ververica.cdc.common.tests.utils.TestUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -45,10 +46,8 @@ import org.testcontainers.utility.MountableFile;
 import javax.annotation.Nullable;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
@@ -154,20 +153,22 @@ public abstract class PipelineTestEnvironment extends TestLogger {
      * <p><b>NOTE:</b> You should not use {@code '\t'}.
      */
     public void submitPipelineJob(String pipelineJob, Path... jars)
-            throws IOException, InterruptedException, URISyntaxException {
+            throws IOException, InterruptedException {
         for (Path jar : jars) {
             jobManager.copyFileToContainer(
                     MountableFile.forHostPath(jar), "/tmp/flinkCDC/lib/" + jar.getFileName());
         }
         jobManager.copyFileToContainer(
-                MountableFile.forHostPath(TestUtils.getResource("flink-cdc.sh")),
+                MountableFile.forHostPath(
+                        TestUtils.getResource("flink-cdc.sh", "flink-cdc-dist", "src"), 755),
                 "/tmp/flinkCDC/bin/flink-cdc.sh");
+        jobManager.copyFileToContainer(
+                MountableFile.forHostPath(
+                        TestUtils.getResource("flink-cdc.yaml", "flink-cdc-dist", "src"), 755),
+                "/tmp/flinkCDC/conf/flink-cdc.yaml");
         jobManager.copyFileToContainer(
                 MountableFile.forHostPath(TestUtils.getResource("flink-cdc-dist.jar")),
                 "/tmp/flinkCDC/lib/flink-cdc-dist.jar");
-        jobManager.copyFileToContainer(
-                MountableFile.forHostPath(TestUtils.getResource("flink-cdc.yaml")),
-                "/tmp/flinkCDC/conf/flink-cdc.yaml");
         Path script = temporaryFolder.newFile().toPath();
         Files.write(script, pipelineJob.getBytes());
         jobManager.copyFileToContainer(
@@ -234,13 +235,6 @@ public abstract class PipelineTestEnvironment extends TestLogger {
                 }
             }
         }
-    }
-
-    private String copyAndGetContainerPath(GenericContainer<?> container, String filePath) {
-        Path path = Paths.get(filePath);
-        String containerPath = "/tmp/" + path.getFileName();
-        container.copyFileToContainer(MountableFile.forHostPath(path), containerPath);
-        return containerPath;
     }
 
     protected String getFlinkDockerImageTag() {

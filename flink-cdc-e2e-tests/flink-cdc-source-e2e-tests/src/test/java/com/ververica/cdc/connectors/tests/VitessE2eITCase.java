@@ -16,9 +16,9 @@
 
 package com.ververica.cdc.connectors.tests;
 
+import com.ververica.cdc.common.tests.utils.JdbcProxy;
+import com.ververica.cdc.common.tests.utils.TestUtils;
 import com.ververica.cdc.connectors.tests.utils.FlinkContainerTestEnvironment;
-import com.ververica.cdc.connectors.tests.utils.JdbcProxy;
-import com.ververica.cdc.connectors.tests.utils.TestUtils;
 import com.ververica.cdc.connectors.vitess.VitessTestBase;
 import com.ververica.cdc.connectors.vitess.container.VitessContainer;
 import org.junit.After;
